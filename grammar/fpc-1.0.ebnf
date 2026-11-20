@@ -1,0 +1,78 @@
+(* FPC 1.0. Keywords are UPPER CASE and reserved only in upper case.
+   NL is a line break. Inside ( ), [ ] and { } line breaks are ignored.
+   "--" starts a comment that runs to the end of the line. *)
+
+document    = { NL | comment NL }, "FPC", version, NL,
+              ( "FLOW" | "LOGIC" ), string, [ "KEY", key ], [ "VERSION", semver ], [ "REVISION", integer ], NL,
+              { header NL }, block, { step } ;
+header      = comment
+            | "SYSTEM", name
+            | "ON", ( "REQUEST", method, path | "EVENT", string | "SCHEDULE", string | "CALL" )
+            | ( "INPUT" | "OUTPUT" ), param, { ",", param } ;
+param       = ( identifier | integer | string ), [ "?" ], ":", type ;
+step        = "STEP", key, [ string ], [ "IN", name ], NL, block ;
+
+block       = { statement | comment NL | NL } ;
+statement   = simple, [ comment ], NL | compound ;
+simple      = [ "SET" ], target, "←", expression
+            | call
+            | "EMIT", name, word, [ "WITH", expression ]
+            | "WAIT", expression, [ "ms" | "s" | "m" | "h" ]
+            | "RETURN", [ expression ]
+            | "RETURN", integer, "WITH", expression, [ "HEADERS", expression ]
+            | "FAIL", ( integer | identifier | string ), expression
+            | "LOG", expression
+            | "BREAK" | "CONTINUE" ;
+compound    = "IF", expression, "THEN", NL, block,
+              { "ELSE", "IF", expression, "THEN", NL, block }, [ "ELSE", NL, block ], "END", "IF", NL
+            | "MATCH", expression, NL, { "CASE", expression, { ",", expression }, NL, block },
+              [ "ELSE", NL, block ], "END", "MATCH", NL
+            | "FOR", "EACH", identifier, [ ",", identifier ], "IN", expression, [ "DO" ], NL, block, "END", "FOR", NL
+            | "FOR", identifier, "FROM", expression, "TO", expression, [ "DO" ], NL, block, "END", "FOR", NL
+            | "REPEAT", expression, "TIMES", NL, block, "END", "REPEAT", NL
+            | "WHILE", expression, [ "DO" ], NL, block, "END", "WHILE", NL
+            | "TRY", NL, block, [ "CATCH", [ identifier ], NL, block ], [ "FINALLY", NL, block ], "END", "TRY", NL
+            | "RETRY", expression, "TIMES", [ "BACKOFF", expression ], [ "AS", identifier ], NL, block,
+              [ "ON", "SUCCESS", NL, block ], [ "ON", "FAILURE", [ "AS", identifier ], NL, block ], "END", "RETRY", NL
+            | "PARALLEL", NL, { "BRANCH", NL, block }, "END", "PARALLEL", NL ;
+target      = identifier, { "." , field | "[", expression, "]" } ;
+call        = "CALL", "LOGIC", key, [ "WITH", expression ]
+            | "CALL", name, method, path, [ "WITH", expression ]
+            | "CALL", name, word, [ "WITH", expression ] ;
+
+expression  = or ;
+or          = and, { "OR", and } ;
+and         = not, { "AND", not } ;
+not         = "NOT", not | comparison ;
+comparison  = sum, [ ( "=" | "≠" | "<" | "≤" | ">" | "≥" | "IN" ), sum | "IS", [ "NOT" ], ( "EMPTY" | "NULL" ) ] ;
+sum         = product, { ( "+" | "-" ), product } ;
+product     = unary, { ( "*" | "/" | "%" ), unary } ;
+unary       = "-", unary | postfix ;
+postfix     = primary, { "." , field | "[", expression, "]" } ;
+primary     = number | string | "true" | "false" | "null" | "TRUE" | "FALSE" | "NULL"
+            | identifier, [ "(", [ expression, { ",", expression } ], ")" ]
+            | "(", expression, ")"
+            | "(", "IF", expression, "THEN", expression, "ELSE", expression, ")"
+            | "{", [ entry, { ",", entry }, [ "," ] ], "}"
+            | "[", [ expression, { ",", expression }, [ "," ] ], "]"
+            | call ;
+entry       = ( identifier | string ), [ ":", expression ] ;
+
+type        = single, { "|", single } ;
+single      = ( "string" | "number" | "integer" | "boolean" | "null" | "any" | "object" | "array" ), [ "(", word, ")" ]
+            | "enum", "(", value, { ",", value }, ")"
+            | "{", [ field, [ "?" ], ":", type, { ",", field, [ "?" ], ":", type } ], "}"
+            | "[", type, "]"
+            | single, "[", "]" ;
+
+(* lexical *)
+identifier  = letter, { letter | digit | "_" | "$" } - keyword ;
+key         = word ;                          (* LOGIC-AUTH-LOGIN-001, LOGIC-AUTH-LOGIN-001/CHK *)
+word        = ? characters with no space between them ? ;
+path        = "/", word ;                     (* /api/v2/users/{id} *)
+method      = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS" ;
+name        = word | string ;                 (* a system: AuthService, "Auth Service" *)
+string      = '"', { character | "\", escape }, '"' ;
+number      = digit, { digit }, [ ".", digit, { digit } ], [ ( "e" | "E" ), [ "+" | "-" ], digit, { digit } ] ;
+comment     = "--", { character } ;
+(* ASCII alternatives: "<-" for "←", "!=" or "<>" for "≠", "<=" for "≤", ">=" for "≥", "==" for "=" *)

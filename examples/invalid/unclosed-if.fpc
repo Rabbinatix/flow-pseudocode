@@ -1,0 +1,6 @@
+-- expect: 5:1 unclosed-block
+FPC 1.0
+LOGIC "Unclosed"
+INPUT x: integer
+IF x > 1 THEN
+  RETURN { big: true }

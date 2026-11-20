@@ -1,0 +1,4 @@
+-- expect: 4:14 nested-call
+FPC 1.0
+LOGIC "Nested"
+SET r ← 1 + (CALL Billing charges.create)

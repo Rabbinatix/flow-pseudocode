@@ -1,0 +1,8 @@
+-- expect: 6:8 case-literal
+FPC 1.0
+LOGIC "Case"
+INPUT v: string, w: string
+MATCH v
+  CASE w
+    LOG "same"
+END MATCH

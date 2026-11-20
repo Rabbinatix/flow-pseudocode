@@ -1,0 +1,69 @@
+FPC 1.0
+LOGIC "Every statement" KEY LOGIC-DEMO-ALL-001 VERSION 2.0.1
+SYSTEM "Order Service"
+ON CALL
+INPUT items: { sku: string, quantity: integer, price?: number | null }[], note?: string | null
+OUTPUT total: number, labels: string[]
+
+-- data
+SET total ← 0
+SET labels ← []
+SET meta ← { "x-trace": uuid(), at: now(), tags: ["a", "b"], nested: { ok: true, none: null } }
+meta.count ← len(items)
+meta["x-trace"] <- lower(trim(meta["x-trace"]))
+-- loops
+FOR EACH item, i IN items
+  IF item.quantity ≤ 0 THEN
+    CONTINUE
+  ELSE IF item.quantity > 100 THEN
+    BREAK
+  ELSE
+    SET total ← total + item.quantity * default(item.price, 0)
+  END IF
+END FOR
+FOR n FROM 1 TO 3 DO
+  SET labels ← append(labels, concat("n", toString(n)))
+END FOR
+REPEAT 2 TIMES
+  LOG "twice"
+END REPEAT
+WHILE total > 1000 AND NOT (note IS NULL)
+  SET total ← total / 2
+END WHILE
+MATCH note
+  CASE "gift", "present"
+    SET labels ← append(labels, "gift")
+  CASE null
+    LOG "no note"
+END MATCH
+-- calls
+SET row ← CALL OrdersDb orders.findById WITH { id: "o-1" }
+IF found(row) AND "vip" IN row.tags THEN
+  CALL OrdersDb orders.update WITH { id: row.id, status: "paid" }
+END IF
+SET line ← CALL LOGIC LOGIC-LIB-LINE-TOTAL-001 WITH { item: at(items, 0) }
+EMIT EventBus "order.updated" WITH { total }
+SET cached ← CALL Cache get WITH "k"
+-- errors and timing
+TRY
+  SET data ← parseJson(note)
+CATCH e
+  LOG e.message
+FINALLY
+  LOG "parsed"
+END TRY
+RETRY 3 TIMES BACKOFF 200 AS attempt
+  CALL Payments POST /charges/{id} WITH { pathParams: { id: row.id }, body: { amount: total } }
+ON SUCCESS
+  LOG "charged"
+ON FAILURE AS err
+  FAIL 502 err.message
+END RETRY
+PARALLEL
+  BRANCH
+    WAIT 500 ms
+  BRANCH
+    WAIT 1 s
+END PARALLEL
+SET ratio ← (IF total = 0 THEN 0 ELSE -total % 7)
+RETURN { total, labels }

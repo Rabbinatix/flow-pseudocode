@@ -1,0 +1,5 @@
+-- expect: 5:10 unknown-function
+FPC 1.0
+LOGIC "Typo"
+INPUT email: string
+SET ok ← isEmial(email)

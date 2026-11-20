@@ -1,0 +1,9 @@
+FPC 1.0
+LOGIC "Nightly cleanup" KEY LOGIC-JOBS-CLEANUP-001 REVISION 1
+ON SCHEDULE "0 3 * * *"
+
+SET old ← CALL SessionsDb sessions.findExpired
+FOR EACH s IN old
+  CALL SessionsDb sessions.delete WITH { id: s.id }
+END FOR
+RETURN

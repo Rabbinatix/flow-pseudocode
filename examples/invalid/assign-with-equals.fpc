@@ -1,0 +1,4 @@
+-- expect: 4:7 syntax
+FPC 1.0
+LOGIC "Equals"
+SET x = 1

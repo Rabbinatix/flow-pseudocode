@@ -1,0 +1,4 @@
+-- expect: 4:9 syntax
+FPC 1.0
+LOGIC "Fail"
+FAIL 400

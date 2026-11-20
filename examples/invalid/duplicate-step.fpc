@@ -1,0 +1,7 @@
+-- expect: 6:1 duplicate-step
+FPC 1.0
+FLOW "Dup"
+STEP LOGIC-A-B-001
+  LOG "one"
+STEP LOGIC-A-B-001
+  LOG "two"

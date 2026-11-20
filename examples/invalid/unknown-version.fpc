@@ -1,0 +1,4 @@
+-- expect: 2:1 fpc-version
+FPC 2.0
+LOGIC "Future"
+RETURN

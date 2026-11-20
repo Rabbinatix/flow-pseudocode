@@ -1,0 +1,4 @@
+-- expect: 4:26 syntax
+FPC 1.0
+LOGIC "Call"
+SET r ← CALL AuthService /api/v2/login WITH { a: 1 }

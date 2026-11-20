@@ -1,0 +1,4 @@
+-- expect: 4:10 unknown-type
+FPC 1.0
+LOGIC "Type"
+INPUT a: strng

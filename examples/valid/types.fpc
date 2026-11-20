@@ -1,0 +1,9 @@
+FPC 1.0
+LOGIC "Types" KEY LOGIC-DEMO-TYPES-001
+ON EVENT "Types changed"
+INPUT s: string, e: string(email), d: string(date-time), n: number, i: integer, b: boolean, z: null, a: any
+INPUT o: object, arr: array, en: enum(admin, member, "two words"), nums: enum(1, 2, 3)
+INPUT obj: { name: string, age?: integer, tags: string[] }, u: string | integer, nl: string | null, ul: [string | null]
+OUTPUT done: boolean
+
+RETURN { done: true }

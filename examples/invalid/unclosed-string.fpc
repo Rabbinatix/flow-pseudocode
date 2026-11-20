@@ -1,0 +1,4 @@
+-- expect: 4:10 syntax
+FPC 1.0
+LOGIC "String"
+FAIL 400 "missing quote

@@ -1,0 +1,6 @@
+-- expect: 6:1 unclosed-block
+FPC 1.0
+LOGIC "Wrong end"
+FOR EACH x IN [1, 2]
+  LOG x
+END WHILE

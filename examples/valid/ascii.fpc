@@ -1,0 +1,11 @@
+FPC 1.0
+LOGIC "ASCII only"
+INPUT a: integer, b: integer
+OUTPUT ok: boolean
+
+SET x <- a
+x <- x + 1
+IF x != b AND x <= 10 AND b >= 0 AND a == 1 THEN
+  RETURN { ok: TRUE }
+END IF
+RETURN { ok: FALSE }

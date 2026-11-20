@@ -1,0 +1,26 @@
+-- A LOGIC document for an endpoint: the request comes in as `request`.
+FPC 1.0
+LOGIC "Sign in (POST /api/v2/login)" KEY LOGIC-AUTH-LOGIN-001 REVISION 4
+SYSTEM AuthService
+ON REQUEST POST /api/v2/login
+INPUT request: { body: { email: string(email), password: string } }
+OUTPUT 200: { accessToken: string, expiresIn: integer, tokenType: enum(Bearer) }, 401: { error: string }
+
+SET email ← request.body.email
+SET emailCheck ← checkEmail(email, "email")
+IF NOT (emailCheck.valid AND NOT (request.body.password IS EMPTY)) THEN
+  RETURN 401 WITH { error: (IF emailCheck.valid THEN checkRequired(request.body.password, "password").message ELSE emailCheck.message) }
+END IF
+SET user ← CALL UserService GET /internal/users/by-email WITH { query: { email } }
+MATCH user.status
+  CASE 200
+    IF user.body.passwordHash ≠ format("hash:{password}", { password: request.body.password }) THEN
+      RETURN 401 WITH { error: "Invalid credentials" }
+    END IF
+    EMIT EventBus user.logged_in WITH { userId: user.body.id } -- analytics
+    RETURN 200 WITH { accessToken: format("TEST-TOKEN-{id}", { id: user.body.id }), expiresIn: 3600, tokenType: "Bearer" }
+  CASE 404
+    RETURN 401 WITH { error: "Invalid credentials" }
+  ELSE
+    FAIL UPSTREAM_ERROR "User Service failed"
+END MATCH

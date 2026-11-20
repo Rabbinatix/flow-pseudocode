@@ -1,0 +1,4 @@
+-- expect: 4:1 status
+FPC 1.0
+LOGIC "Status"
+RETURN 999 WITH null

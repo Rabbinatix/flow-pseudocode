@@ -1,0 +1,4 @@
+-- expect: 4:1 break-outside-loop
+FPC 1.0
+LOGIC "Break"
+BREAK
