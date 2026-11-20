@@ -19,7 +19,7 @@ STEP LOGIC-AUTH-LOGIN-001/CHK "Inputs valid?"
   END IF
 
 STEP LOGIC-AUTH-LOGIN-001/CALL
-  result ← CALL AuthService POST /api/v2/login WITH { email, password }
+  SET result ← CALL AuthService POST /api/v2/login WITH { email, password }
   IF result.status = 401 THEN
     FAIL 401 "Invalid credentials"
   END IF
@@ -36,7 +36,52 @@ npm install @rabbinatix/flow-pseudocode
 
 Pure TypeScript, **no dependencies**, ESM and CommonJS, types included. Node 18 or newer, or any modern browser bundle.
 
-## Use
+## Command line
+
+```sh
+npx @rabbinatix/flow-pseudocode check login.fpc    # nothing to install
+npm install -g @rabbinatix/flow-pseudocode         # or install it: the command is `rfpc`
+```
+
+| Command | What it does |
+|---|---|
+| `rfpc check [paths…]` | check files; a folder is searched for `*.fpc`; `-` reads standard input; no path means the current folder |
+| `rfpc format [path]` | print the canonical text of a valid file |
+| `rfpc format --write [paths…]` | rewrite files in place |
+| `rfpc format --check [paths…]` | change nothing; exit 1 if a file isn't canonical |
+| `rfpc cheat-sheet` | print the one-page cheat sheet, to give to an AI assistant |
+| `rfpc grammar` | print the EBNF grammar |
+
+`check` options: `--format text` (default), `--format json` (for scripts and AI loops) or `--format github` (annotations on a pull
+request), and `--strict` to fail on warnings too. `--no-color` turns colours off (so does `NO_COLOR`).
+
+```
+$ rfpc check login.fpc
+login.fpc:5:7  error  syntax  Use ← (or <-) to set a value; = compares
+  5 | SET b = upper(a)
+    |       ^
+1 file checked, 1 error, 0 warnings
+```
+
+**Exit codes:** `0` all good · `1` problems found in the FPC (or a file `format --check` would change) · `2` the tool couldn't run
+(unknown command or option, a path that doesn't exist, a folder with no `.fpc` files).
+
+In **GitHub Actions**:
+
+```yaml
+- run: npx @rabbinatix/flow-pseudocode check . --format github
+```
+
+As a **pre-commit** hook (`.git/hooks/pre-commit`, or the same line in Husky or lefthook):
+
+```sh
+npx @rabbinatix/flow-pseudocode format --check . && npx @rabbinatix/flow-pseudocode check .
+```
+
+With an **AI assistant**: give it `rfpc cheat-sheet`, ask for FPC, run `rfpc check - --format json` on its answer, and send the
+diagnostics back until `ok` is `true`.
+
+## Use as a library
 
 ```ts
 import { check, format, parse, print } from '@rabbinatix/flow-pseudocode';
@@ -92,6 +137,7 @@ The same files are in the package: `@rabbinatix/flow-pseudocode/cheat-sheet.md` 
 | `spec/fpc-1.0.md` | the normative specification (CC BY 4.0) |
 | `grammar/fpc-1.0.ebnf`, `grammar/cheat-sheet.md` | generated from the code: `npm run generate` |
 | `src/` | the reference implementation (MIT): `lexer`, `parser`, `validator`, `printer`, `ast`, `constructs`, `grammar` |
+| `src/cli/` | the `rfpc` command (Node only; the library never imports it) |
 | `examples/valid`, `examples/invalid` | the test corpus: every valid file parses and round-trips; each invalid file starts with `-- expect: line:col code` |
 | `test/` | the tests |
 

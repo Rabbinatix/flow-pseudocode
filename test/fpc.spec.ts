@@ -137,7 +137,10 @@ describe('FPC construct table', () => {
     const readme = readFileSync('README.md', 'utf8') as string;
     const ex = /```\nFPC 1\.0([\s\S]*?)```/.exec(readme);
     expect(ex).not.toBeNull();
-    expect(check(`FPC 1.0${ex![1]}`).diagnostics).toEqual([]);
+    const src = `FPC 1.0${ex![1]}`;
+    expect(check(src).diagnostics).toEqual([]);
+    // it is shown as `rfpc format` would write it, so `rfpc format --check` passes on it
+    expect(format(src).text).toBe(src);
   });
   it('ships the generated grammar and cheat sheet files, in step with the code (run `npm run generate` when this fails)', () => {
     expect(readFileSync('grammar/fpc-1.0.ebnf', 'utf8') as string).toBe(FPC_GRAMMAR);

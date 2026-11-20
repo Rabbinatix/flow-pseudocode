@@ -1,11 +1,27 @@
 {
   "name": "@rabbinatix/flow-pseudocode",
-  "version": "1.0.0",
-  "description": "Flow Pseudocode (FPC) 1.0: a strict, typed pseudocode for developers and AI assistants. Lexer, parser, validator and canonical printer, with no dependencies.",
-  "keywords": ["pseudocode", "fpc", "flow-pseudocode", "parser", "validator", "ai", "llm", "spec", "ebnf", "api-contracts"],
+  "version": "1.1.0",
+  "description": "Flow Pseudocode (FPC) 1.0: a strict, typed pseudocode for developers and AI assistants. Lexer, parser, validator and canonical printer with no dependencies, plus the rfpc command-line checker and formatter.",
+  "keywords": [
+    "pseudocode",
+    "fpc",
+    "flow-pseudocode",
+    "parser",
+    "validator",
+    "ai",
+    "llm",
+    "spec",
+    "ebnf",
+    "api-contracts"
+  ],
   "homepage": "https://rabbinatix.com/guide/pseudocode",
-  "bugs": { "url": "https://github.com/Rabbinatix/flow-pseudocode/issues" },
-  "repository": { "type": "git", "url": "git+https://github.com/Rabbinatix/flow-pseudocode.git" },
+  "bugs": {
+    "url": "https://github.com/Rabbinatix/flow-pseudocode/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rabbinatix/flow-pseudocode.git"
+  },
   "license": "MIT",
   "author": "Rabbinatix",
   "type": "module",
@@ -15,22 +31,44 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-      "require": { "types": "./dist/index.d.cts", "default": "./dist/index.cjs" }
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./grammar.ebnf": "./grammar/fpc-1.0.ebnf",
     "./cheat-sheet.md": "./grammar/cheat-sheet.md",
     "./package.json": "./package.json"
   },
-  "files": ["dist", "grammar", "spec", "examples", "LICENSE", "LICENSE-SPEC", "README.md", "CHANGELOG.md"],
-  "engines": { "node": ">=18" },
-  "publishConfig": { "access": "public" },
+  "bin": {
+    "rfpc": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "grammar",
+    "spec",
+    "examples",
+    "LICENSE",
+    "LICENSE-SPEC",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "generate": "npm run build && node scripts/generate.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "check": "npm run typecheck && npm test && npm run build",
+    "check": "npm run typecheck && npm run build && npm test",
     "prepublishOnly": "npm run generate && npm run check"
   },
   "devDependencies": {

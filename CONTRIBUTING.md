@@ -10,7 +10,7 @@ improvements and grammar proposals are all welcome.
 git clone https://github.com/Rabbinatix/flow-pseudocode.git
 cd flow-pseudocode
 npm install
-npm run check      # typecheck + tests + build; run it before every pull request
+npm run check      # typecheck, build, tests; run it before every pull request (the CLI test needs the build)
 npm test           # just the tests (vitest); `npx vitest` keeps them running while you edit
 ```
 
@@ -35,7 +35,10 @@ text ──lexer.ts──▶ tokens ──parser.ts──▶ AST (ast.ts) ──
 | `src/printer.ts` | AST → canonical text. `print(parse(x))` is the canonical form of `x` |
 | `src/constructs.ts` | **the one table** of keywords, functions and constructs. The lexer, validator, cheat sheet and tests all read it |
 | `src/grammar.ts` | the EBNF grammar text and the cheat sheet, as strings |
-| `src/index.ts` | what the package exports |
+| `src/index.ts` | what the package exports (never the CLI: the library stays free of Node) |
+| `src/cli/run.ts` | the `rfpc` command: arguments in, exit code out (0 good, 1 problems, 2 couldn't run). Everything goes through an `Io` object, so tests run it against a temp folder |
+| `src/cli/args.ts`, `files.ts`, `report.ts` | reading the options; finding the `*.fpc` files; printing problems as text, JSON or GitHub annotations |
+| `src/cli/io.ts`, `bin.ts` | the real disk and terminal, and the tiny executable around `run` |
 | `spec/fpc-1.0.md` | the normative specification |
 | `grammar/` | generated: `npm run generate` rewrites it from the code; a test fails when it is stale |
 | `examples/valid/`, `examples/invalid/` | the test corpus (see below) |
